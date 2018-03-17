@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>&pi;</title>
+<meta id="viewport" name="viewport" content="width=device-width" />
+<style>
+html, body, input {
+    font-size: 22pt;
+    font-family: Helvetica, Arial, sans-serif;
+}
+#main {
+    padding-top: 18%;
+    text-align: center;
+}
+#main-left {
+    float: left;
+    text-align: right;
+    width: 50%;
+}
+#main-left-inner {
+    margin-left: -25em;
+}
+#main-right {
+    float: right;
+    text-align: left;
+    width: 50%;
+}
+#box, input:focus#box {
+    border: 0;
+    outline: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+#score, #bottom {
+    font-size: 12pt;
+    color: #555;
+    padding-bottom: 12px;
+}
+button {
+    -moz-box-shadow:inset 0px 1px 0px 0px #2d3d4d;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #2d3d4d;
+    box-shadow:inset 0px 1px 0px 0px #2d3d4d;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #52595c), color-stop(1, #000000));
+    background:-moz-linear-gradient(top, #52595c 5%, #000000 100%);
+    background:-webkit-linear-gradient(top, #52595c 5%, #000000 100%);
+    background:-o-linear-gradient(top, #52595c 5%, #000000 100%);
+    background:-ms-linear-gradient(top, #52595c 5%, #000000 100%);
+    background:linear-gradient(to bottom, #52595c 5%, #000000 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#52595c', endColorstr='#000000',GradientType=0);
+    background-color:#52595c;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius:3px;
+    border:1px solid #e0e0e0;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-family:Arial;
+    font-size:13px;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #000000;
+}
+button:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #000000), color-stop(1, #52595c));
+    background:-moz-linear-gradient(top, #000000 5%, #52595c 100%);
+    background:-webkit-linear-gradient(top, #000000 5%, #52595c 100%);
+    background:-o-linear-gradient(top, #000000 5%, #52595c 100%);
+    background:-ms-linear-gradient(top, #000000 5%, #52595c 100%);
+    background:linear-gradient(to bottom, #000000 5%, #52595c 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#000000', endColorstr='#52595c',GradientType=0);
+    background-color:#000000;
+}
+button:active {
+    position:relative;
+    top:1px;
+}
+</style>
+</head>
+<body onclick="return windowfocus(event)">
+<noscript>This page requires JavaScript</noscript>
+<div id="main">
+<div id="score">&nbsp;</div>
+<div id="main-left"><div id="main-left-inner"><span id="digits-start"><em>&pi;</em>&nbsp;=&nbsp;3.</span></div></div>
+<div id="main-right"><input id="box" type="number" pattern="[0-9]*" inputmode="numeric" autofocus onkeypress="return boxkeypress(event)" /></div>
+<div id="bottom"></div>
+</div>
+<script>
+function $(id) { return document.getElementById(id); }
+var box = $('box');
+var mainLeft = $('main-left-inner');
+var mainRight = $('main-right');
+var score = $('score');
+var bottom = $('bottom');
+
+function windowfocus() {
+    box.focus();
+    return false;
+};
+function boxkeypress(e) {
+    var keyCode = (e.keyCode || e.charCode);
+    if (e.ctrlKey || e.cmdKey || e.metaKey) return;
+    if (keyCode >= 48 && keyCode <= 57) {
+        piTryDigit(keyCode - 48);
+        return false;
+    };
+    if (keyCode === 9 || keyCode === 13 || keyCode == 46) {
+        if (piGameOver) piReset();
+        return false;
+    };
+    if (e.charCode >= 32 && e.charCode <= 127) {
+        return false;
+    };
+};
+
+var piCur = 0;
+var piGameOver = false;
+function piTryDigit(digit) {
+    if (piGameOver) {
+        return;
+    };
+    if (piDigits.charCodeAt(piCur) - 48 === digit) {
+        piAdvanceDigit();
+        return true;
+    };
+    bottom.innerHTML = 'GAME OVER<br /><button onclick="piReset()">Try again <small>(Enter)</small></button>';
+    box.placeholder = piDigits.substr(piCur,50);
+    piGameOver = true;
+    return false;
+};
+function piReset() {
+    mainLeft.innerHTML = '<span id="digits-start"><em>&pi;</em>&nbsp;=&nbsp;3.</span>';
+    box.placeholder = '';
+    bottom.innerHTML = '';
+    score.innerHTML = '&nbsp;';
+    piCur = 0;
+    piGameOver = false;
+    box.focus();
+};
+function piAdvanceDigit() {
+    mainLeft.innerHTML += piDigits.charAt(piCur);
+    if (piCur > 50) {
+        mainLeft.innerHTML = mainLeft.innerHTML.slice(-50);
+    };
+    piCur++;
+    score.innerHTML = 'Score: '+piCur;
+};
+function cheat() {
+    setInterval(function() {
+    if (!piGameOver) piAdvanceDigit();
+    }, 100);
+};
+
+var piDigits;
+
+function getPi(url) {
+    fetch(url).then(response => response.text()).then(text => piDigits = text.substring(2));
+};
+getPi("/pi/pi.txt");
+
+if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+    box.type = 'text';
+};
+</script>
+</body>
+</html>
